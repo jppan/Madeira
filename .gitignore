@@ -21,6 +21,8 @@ research/*.md
 
 # Build artifacts
 app/build/
+dist/
+build/freetype-ios/build/
 app/DerivedData/
 build/DerivedData/
 build/xcode-derived/

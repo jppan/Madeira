@@ -29,6 +29,9 @@ App Store. It is installed by sideloading.
 
 ## Building
 
+To build an IPA on GitHub's macOS runners from Linux or an iPad, follow
+[`docs/GITHUB_ACTIONS.md`](docs/GITHUB_ACTIONS.md).
+
 The build is split across several chains — the unix-side Wine libraries, the
 ARM64EC PE modules, FEX, DXMT and the iOS app itself. `build/*/build.sh` covers
 the native pieces; the app is built with `xcodebuild`.
