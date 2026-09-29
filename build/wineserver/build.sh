@@ -17,7 +17,7 @@ if [ ! -f "$OBJ_DIR/libwineserver.a" ]; then
     if [ -f "$APP_LIB" ]; then
         cp "$APP_LIB" "$OBJ_DIR/libwineserver.a"
     else
-        echo "ERROR: No base libwineserver.a found"
+        echo "ERROR: No base libwineserver.a found; run build/wineserver/bootstrap-base.sh first"
         exit 1
     fi
 fi
@@ -91,6 +91,7 @@ PATCHED_FILES=(
     "winstation:$WINE_SRC/server/winstation.c:winstation.o"
     # task#32 Steam: stop_thread Mach-based context capture (iOS signal
     # suspend is dead) lives in the submodule's thread.c
+    # ml952 also puts the fastsync claim release in check_wait() here.
     "thread:$WINE_SRC/server/thread.c:thread.o"
     # ml1058: in-process synchronisation. The archive's copy was compiled with no
     # ntsync header, i.e. as the all-stubs variant; build the real one against the
@@ -102,6 +103,11 @@ PATCHED_FILES=(
     # forensics were reading three-week-old mystery code. The submodule
     # copy adds the [srv-conn]/[tcp-state]/[tcp-enum] probes.
     "sock:$WINE_SRC/server/sock.c:sock.o"
+    # The fork's semaphore.c/completion.c carry the in-process fast-path and
+    # waiter-wake changes (inproc_sync.c and queue_ios.c call into them); the
+    # prebuilt base archive's copies predate those and leave undefined symbols.
+    "semaphore:$WINE_SRC/server/semaphore.c:semaphore.o"
+    "completion:$WINE_SRC/server/completion.c:completion.o"
 )
 
 echo "=== Building kill wrapper (without kill macro) ==="
@@ -166,6 +172,8 @@ REPLACEMENTS=(
     "mapping.o:mapping.o"
     "winstation.o:winstation.o"
     "thread.o:thread.o"
+    "event.o:event.o"
+    "inproc_sync.o:inproc_sync.o"
     "sock.o:sock.o"
     "object.o:object.o"
     "async.o:async.o"
@@ -176,6 +184,8 @@ REPLACEMENTS=(
     "event.o:event.o"
     "handle.o:handle.o"
     "inproc_sync.o:inproc_sync.o"   # ml1058
+    "semaphore.o:semaphore.o"
+    "completion.o:completion.o"
 )
 
 for entry in "${REPLACEMENTS[@]}"; do
